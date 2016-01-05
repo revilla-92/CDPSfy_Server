@@ -31,7 +31,7 @@ exports.show = function (req, res) {
 // Escribe una nueva canción en el registro de canciones.
 exports.create = function (req, res) {
 /***OJO!!! CAMBIAR ESTA URL POR LA QUE SEA PARA IR HACIA TRACKS. Seguramente tracks.cdpsfy.es **/
-	var urlPostTracks = 'http://localhost:3030/api/tracks';
+	var urlPostTracks = 'http://www.tracks.cdpsfy.es/api/tracks';
 
 	var track = req.files.track;
 	var extension = track.extension;
@@ -67,7 +67,7 @@ exports.create = function (req, res) {
 
 //OJO!!!! CAMBIAR LA RUTA DE A TRACKS.CDPSFY.ES!!!
 		  //le ponemos delante el prefijo para llamar al GET de la API
-		  var newURL = 'http://localhost:3030/api/tracks/'+body;
+		  var newURL = 'http://www.tracks.cdpsfy.es/api/tracks/'+body;
 
 
 		  console.log('Upload successful!  Server responded with URL:', body);
@@ -82,8 +82,6 @@ exports.create = function (req, res) {
 		}
 	});
 
-	
-
 	res.redirect('/tracks');
 };
 
@@ -94,7 +92,7 @@ exports.destroy = function (req, res) {
 	var trackId = req.params.id;
 	var trackSelected = track_model.tracks[trackId];
 	var diskName = trackSelected.diskName;
-	var serverURL = 'http://localhost:3030/api/tracks/'+diskName;
+	var serverURL = 'http://www.tracks.cdpsfy.es/api/tracks'+diskName;
 	var request = require('request');
 	request.post(serverURL, '');
 
