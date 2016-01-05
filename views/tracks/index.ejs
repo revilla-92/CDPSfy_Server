@@ -1,0 +1,10 @@
+
+
+<%for (var t in tracks) {%>
+
+<a class="track" href='/tracks/<%=t%>'>
+	<img src="/images/quaver3.png">
+	<p><%=tracks[t].name%></p>
+</a>
+
+<%}%>
