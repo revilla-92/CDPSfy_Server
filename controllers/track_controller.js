@@ -16,7 +16,8 @@ exports.list = function (req, res) {
 exports.new = function (req, res) {
 	res.render('tracks/new', {
        	errorformat: false,
-       	errornosongfound: false
+       	errornosongfound: false,
+       	msgsuccess: false
     });
 };
 
@@ -69,7 +70,8 @@ exports.create = function (req, res) {
 			console.log("Formato incorrecto");
 			res.render('tracks/new', {
        			errorformat: true,
-       			errornosongfound: false
+       			errornosongfound: false,
+       			msgsuccess: false
    			});
 		} 
 		// Si el formato es adecuado entonces subimos la cancion.
@@ -110,7 +112,8 @@ exports.create = function (req, res) {
 			console.log("Se ha subido la cancion sin problemas.");
 			res.render('tracks/new', {
 		       	errorformat: false,
-		       	errornosongfound: false
+		       	errornosongfound: false,
+		       	msgsuccess: true
 		   	});
 		}
 
@@ -119,7 +122,8 @@ exports.create = function (req, res) {
 		console.log("No ha seleccionado una cancion.");
 		res.render('tracks/new', {
 	       	errorformat: false,
-	       	errornosongfound: true
+	       	errornosongfound: true,
+	       	msgsuccess: false
 	   	});
 	}
 
