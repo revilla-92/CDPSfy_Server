@@ -2,8 +2,8 @@
 
 <%for (var t in tracks) {%>
 
-<a class="track" href='/tracks/<%=t%>'>
-	<img src="/images/quaver3.png">
+<a class="track" href='/tracks/<%=tracks[t].diskName%>'>
+	<img src="<%=tracks[t].image%>">
 	<p><%=tracks[t].name%></p>
 </a>
 

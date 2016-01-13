@@ -7,7 +7,13 @@
 	<%if (errornosongfound) { %>
 		<label style="color:red;" id="notfoundmessage"> Select a file to upload please. </label>
 	<% } %>
-	<input class="upload_field" type="file" name="track"/>
+	<input class="upload_field" type="file" name="track"/><br><br>
+	<%if (errorformatImage) { %>
+		<label style="color:red;" id="errorformatImage"> Supported files: png, jpg, jpeg. </label>
+	<% } %>
+	<label class="upload_field">Upload an image for the track: </label><br>
+	<input class="upload_field" type="file" name="image"/>
+	<br><br>
 	<button class="hint upload_field" type="submit">Upload</button>
 	<br>
 	<%if (msgsuccess) { %>

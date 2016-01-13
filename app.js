@@ -6,17 +6,30 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var partials = require('express-partials');
 var methodOverride = require('method-override');
+var mongoose = require('mongoose');
 
 var routes = require('./routes/index');
 
 var app = express();
+
+/*BBDD*/
+mongoose.connect('mongodb://localhost/tracks', function(err, res) {
+  if (err){
+    console.log('ERROR: conectando a la DB. '+err);
+  }else{
+    console.log('Conectado a la DB');
+  }
+});
+
+var models = require('./models/tracks')(app,mongoose);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(partials());
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
