@@ -1,10 +1,10 @@
 <div class="track track_playing">
-	<img src="/images/quaver3.png">
+	<img src="<%=track.image%>">
 	<p><%=track.name%></p>
 	<audio src="<%=track.url%>" type="audio/mpeg" controls="controls"></audio>
 	
 	<form method="post" action="/tracks/<%=track.diskName%>?_method=delete">
-	    <button type="submit" onClick="return confirm('Delete: <%=track.name%>. Are you sure? ');">
+	    <button id="borrar" type="submit" onClick="return confirm('Delete: <%=track.name%>. Are you sure? ');">
 	      Delete track
 	    </button>
   	</form>
