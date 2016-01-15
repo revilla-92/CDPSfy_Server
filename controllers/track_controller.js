@@ -211,7 +211,7 @@ exports.destroy = function (req, res) {
 			//encontrada. Borramos.
 			//borramos la imagen
 			//si la imagen es la de por defecto, no la borro
-			if (track.image !== '/images/quaver3.png'){
+			if (track.image !== '/images/iconodisco.jpg'){
 				var fs = require('fs');
 				var filePath = './public'+track.image ; 
 				fs.unlinkSync(filePath);
