@@ -92,7 +92,7 @@ exports.create = function (req, res) {
 			fs.writeFile(newURL, caratula.buffer, 'binary', function(err) {
 		    	if(err) {
 		    	    console.log("ERROR AL GUARDAR LA CARATULA"+err);
-		    	    var imagesURL = '/images/quaver3.png';
+		    	    var imagesURL = '/images/iconodisco.jpg';
 					caratulaURL = imagesURL;
 		    	}else{
 		    		console.log("CARATULA GUARDADA");
@@ -101,7 +101,7 @@ exports.create = function (req, res) {
 			}); 
 		}
 	}else{ // no hay imagen
-		var imagesURL = '/images/quaver3.png';
+		var imagesURL = '/images/iconodisco.jpg';
 		caratulaURL = imagesURL;
 	}
 	/**************/
