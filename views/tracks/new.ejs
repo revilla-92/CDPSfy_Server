@@ -1,4 +1,4 @@
-<form action="/tracks" method="post" enctype="multipart/form-data">
+<form class="formulario" action="/tracks" method="post" enctype="multipart/form-data">
 	<label class="upload_field">Upload a new track:</label>
 	<br>
 	<%if (errorformat) { %>
@@ -13,8 +13,8 @@
 	<% } %>
 	<label class="upload_field">Upload an image for the track: </label><br>
 	<input class="upload_field" type="file" name="image"/>
-	<br><br>
-	<button class="hint upload_field" type="submit">Upload</button>
+	<br>
+	<button id="upload" class="hint upload_field" type="submit">Upload</button>
 	<br>
 	<%if (msgsuccess) { %>
 		<label style="color:green;" id="successmessage"> File uploaded successfully. </label>
