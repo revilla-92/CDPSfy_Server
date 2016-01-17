@@ -1,12 +1,12 @@
 <div id="indexSongs">
 
-	<%for (var t in tracks) {%>
+<%for (var t in tracks) {%>
 
-		<a class="track" href='/tracks/<%=tracks[t].diskName%>'>
-			<img src="<%=tracks[t].image%>">
-			<p><%=tracks[t].name%></p>
-		</a>
+<a class="track" href='/tracks/<%=tracks[t].diskName%>'>
+	<img src="<%=tracks[t].image%>">
+	<p><%=tracks[t].name%></p>
+</a>
 
-	<%}%>
+<%}%>
 
 </div>

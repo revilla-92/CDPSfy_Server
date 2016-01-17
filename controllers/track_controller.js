@@ -1,16 +1,17 @@
-var Tracks = require('./../models/tracks');
-var querystring = require('querystring');
-var Track = mongoose.model('Tracks');
-var mongoose = require('mongoose');
-var request = require('request');
-var http = require('http');
 var fs = require('fs');
+//var track_model = require('./../models/track');
+var querystring = require('querystring');
+var http = require('http');
 
+var mongoose = require('mongoose');
+var Tracks = require('./../models/tracks');
+var Track = mongoose.model('Tracks');
 
 // Devuelve una lista de las canciones disponibles y sus metadatos
 exports.list = function (req, res) {
 
-	// Conectamos a la BBDD de Mongodb y buscamos todas las "tracks".
+
+	//conectamos con mongo y recogemos el listado de tracks:
 	var listado = Track.find(function(err, tracks){
 		if (err){
 			console.log("ERROR BUSCANDO CANCIONES"+ err);
@@ -19,7 +20,6 @@ exports.list = function (req, res) {
 		}
 	});
 };
-
 
 // Devuelve la vista del formulario para subir una nueva canción
 exports.new = function (req, res) {
@@ -31,48 +31,41 @@ exports.new = function (req, res) {
     });
 };
 
-
 // Devuelve la vista de reproducción de una canción.
+// El campo track.url contiene la url donde se encuentra el fichero de audio
 exports.show = function (req, res) {
 
-	// Imprimos la peticion pedida.
-	console.log("Request: "+req.params.trackId);
+	console.log("REQ: "+req.params.trackId);
 
-	// Buscamos dentro de la BBDD aquella que tiene como diskName (Nombre en Disco) la ID pasada en la request.
 	var query = Track.findOne({'diskName':req.params.trackId});
 
-	// Ejecutamos la busqueda y si la encontramos renderizamos la vista con el objeto cancion (contiene ademas la caratula).
 	query.exec(function(err,track){
 		if (err){
-			console.log("ERROR: Fallo encontrando la cancion en la BBDD: " + err);
+			console.log("FALLO ENCONTRANDO LA CANCION EN LA BBDD "+err);
 		}else{
-			console.log("SUCCESS: Cancion encontrada: " + track);
+			console.log("ENCONTRADA: "+track);
 			res.render('tracks/show', {track: track});
 		}
 	});
 };
 
-
 // Escribe una nueva canción en el registro de canciones.
 exports.create = function (req, res) {
+/***OJO!!! CAMBIAR ESTA URL POR LA QUE SEA PARA IR HACIA TRACKS. Seguramente tracks.cdpsfy.es **/
+	var urlPostTracks = 'http://www.tracks.cdpsfy.es/api/tracks';
 
-	/**********************************************************************************/
-	/********************************** CARATULAS *************************************/
-
-	// Las caratulas se guardan en /CDPSfy_Server/public/images, que se encuentra montado y replicado, para mejorar disponibilidad.
-
-	// Variables para las caratulas.
 	var caratulaURL = '';
+
 	var allowedExtensionsImage = ["png","jpg","jpeg"];
 
-	// Como poner la caratula es opcional, no comprobamos si el campo se encuentra vacio, ya que si lo esta ponemos una por defecto.
+	/***CARATULA***/
+	//Las caratulas se guardan en public/images
+
+	//poner la caratula es opcional, por lo que compruebo si la ha puesto para subirla o no.
 	if (req.files.image != null){
-
-		// Si la imagen de la caratula no tiene los formatos adecuados, entonces lanzamos mensaje de error de formato.
+		console.log(allowedExtensionsImage.indexOf(req.files.image.extension.toLowerCase()));
 		if (allowedExtensionsImage.indexOf(req.files.image.extension.toLowerCase()) == -1){
-
 			console.log("La imagen no es válida.");
-
 			res.render('tracks/new', {
 		       	errorformat: false,
 		       	errorformatImage: true,
@@ -80,70 +73,42 @@ exports.create = function (req, res) {
 		       	msgsuccess: false
 		   	});
 
-		// En su caso subimos la imagen a /CDPSfy/public/images
-		}else{
+			return;
 
-			// La url de upload debe llevar el ./public delante. La que guardamos no.
+		}else{
+			//La url de upload debe llevar el ./public delante. La que guardamos no.
 			var imagesURLUpload = './public/images/';
 			var imagesURLGuardar = '/images/';
 
-			// Fichero con la caratula.
+			//fichero
 			var caratula = req.files.image;
 
-			// Hacemos un nombre con un numero random entre 1-100, para evitar duplicados o repeticiones.
+			//hacemos un nombre con un numero random entre 1-100, para no repetir
 			var random = Math.floor((Math.random() * 100) + 1);
 			var caratulaName = random+caratula.originalname;
 			var newURL = imagesURLUpload + caratulaName;
 			
-			// Guardamos la imagen.
+			var fs = require('fs');
 			fs.writeFile(newURL, caratula.buffer, 'binary', function(err) {
-
-				// Si por algun casual se produce un error al guardar la imagen ponemos la imagen por defecto.
 		    	if(err) {
-		    	    console.log("ERROR: No se pha podido guardar la caratula. " + err);
+		    	    console.log("ERROR AL GUARDAR LA CARATULA"+err);
 		    	    var imagesURL = '/images/iconodisco.jpg';
 					caratulaURL = imagesURL;
-					
 		    	}else{
-		    		console.log("SUCCESS: Caratula guardada.");
+		    		console.log("CARATULA GUARDADA");
 		    		caratulaURL = imagesURLGuardar+caratulaName;
 		    	}
 			}); 
 		}
-
-	// Si no hay imagen subida ponemos la imagen por defecto.	
-	}else{ 
+	}else{ // no hay imagen
 		var imagesURL = '/images/iconodisco.jpg';
 		caratulaURL = imagesURL;
 	}
+	/**************/
 
-	/******************************** FIN CARATULAS ************************************/
-	/***********************************************************************************/
-
-
-	/**********************************************************************************/
-	/********************************** CANCIONES *************************************/
-
-	// URL para guardar la cancion (y solo la cancion, no la caratula) en los discos nas.
-	var urlPostTracks = 'http://www.tracks.cdpsfy.es/api/tracks';
-
-	// Variables para las canciones.
 	var track = req.files.track;
-	var extension = track.extension;
-	var allowedExtensions = ["mp3","wav","ogg"];
-	var name = track.originalname.split('.')[0];
-	var id = track.name.split('.')[0];
-	var buffer = track.buffer;
-
-	// Esta url debe ser la correspondiente al nuevo fichero en tracks.cdpsfy.es
-	var url = '';
-
-	// Imprimimos la cancion subida.
-	console.log('Nuevo fichero de audio. Datos: ', track);
-	
-	// Si se ha subido cancion devolvemos un mensaje de error
-	if (typeof track === 'undefined'){
-
+	//si no hay cancion
+	if (typeof track == 'undefined'){
 		console.log("No ha seleccionado una cancion.");
 		res.render('tracks/new', {
 	       	errorformat: false,
@@ -151,12 +116,16 @@ exports.create = function (req, res) {
 	       	errorformatImage: false,
 	       	msgsuccess: false
 	   	});
+	   	return;
 	}
 
-	// Recogemos la extension para comprobar si se encuentra entre las permitidas.
+	var extension = track.extension;
+	var allowedExtensions = ["mp3","wav","ogg"];
 	extension.toLowerCase();
 
-	// Si no esta entre los formatos permitidos mandamos un error de formato.
+
+
+	//si la extension no está en el array de allowedExtensions, redirecciono a error.
 	if (allowedExtensions.indexOf(extension) == -1){
 		console.log("Formato incorrecto");
 			res.render('tracks/new', {
@@ -165,32 +134,38 @@ exports.create = function (req, res) {
        			errorformatImage: false,
        			msgsuccess: false
    			});
+		return;
 	}
+	console.log('Nuevo fichero de audio. Datos: ', track);
+	var id = track.name.split('.')[0];
+	var name = track.originalname.split('.')[0];
 
-	// Implementamos la escritura del fichero de audio (track.buffer) en tracks.cdpsfy.es.
+	// Aquí debe implementarse la escritura del fichero de audio (track.buffer) en tracks.cdpsfy.es
+	// Esta url debe ser la correspondiente al nuevo fichero en tracks.cdpsfy.es
+	var buffer = track.buffer;
 
-	// Peticion POST para guardar la cancion en el tracks.
+	var url = '';
+	//peticion POST para guardar la cancion en el tracks
+	var request = require('request');
 	var formData = {
 		filename: name+'.'+extension,
 		my_buffer: buffer
 	};
-
-	// Mandamos la peticion para guardar la cancion a tracks.cdpsfy.es para guardarla en los discos nas.
 	request.post({url:urlPostTracks, formData: formData}, function optionalCallback(err, httpResponse, body) {
-
 		if (err) {
 		  return console.error('upload failed:', err);
-
 		}else{
-		  // Guardamos la URL, que será la respuesta que de la conexion, si todo ha ido bien.
-		  // El parametro body es del estilo: NOMBRE.mp3
+		  //guardamos la URL, que será la respuesta que de la conexion, si todo ha ido bien.
+		  //body es del estilo: NOMBRE.mp3
 
-		  // Le ponemos delante el prefijo para llamar al GET de la API.
+//OJO!!!! CAMBIAR LA RUTA DE A TRACKS.CDPSFY.ES!!!
+		  //le ponemos delante el prefijo para llamar al GET de la API
 		  var newURL = 'http://www.tracks.cdpsfy.es/api/tracks/'+body;
 
-		  console.log('Upload successful!  Server responded with URL:', body);
 
-		  // Escribe los metadatos de la nueva canción en la BBDD_
+		  console.log('Upload successful!  Server responded with URL:', body);
+		  // Escribe los metadatos de la nueva canción en el registro.
+
 		  var track = new Track({
 		  		name: name,
 		  		url: newURL,
@@ -198,60 +173,63 @@ exports.create = function (req, res) {
 		  		image: caratulaURL
 		  });
 
-		  // Y los guardamos en la BBDD y redireccionamos a /tracks donde se ha debido subir la cancion con exito.
 		  track.save(function(err, track){
 		  	if (err){
-		  		console.log("ERROR: Se ha producido un error guardando la cancion en la BBDD.");
+		  		console.log("ERROR GUARDANDO CANCION EN LA BBDD");
 		  	}else{
-		  		console.log("SUCCESS: Cancion guardada en la BBDD. " + track);
+		  		console.log("CANCION GUARDADA EN LA BBDD: "+track);
 		  	}
 		  	res.redirect('/tracks');
 		  });
 		}
 	});
-
-	/******************************** FIN CANCIONES ************************************/
-	/***********************************************************************************/
-	
 };
 
-
-// Borra una canción (trackId) del registro de canciones. 
+// Borra una canción (trackId) del registro de canciones 
+// A la api se llama por el nombre, por lo que recuperamos el diskname del modelo de datos.
 exports.destroy = function (req, res) {
+//OJO!!! CAMBIAR POR MONGODB
 
-	// Recogemos la id de la cancion a eliminar de la peticion.
 	var diskName = req.params.id;
 
-	// La URL de la cual recogemos de los discos nas.
+	//var trackId = req.params.id;
+	//var trackSelected = track_model.tracks[trackId];
+	//var diskName = trackSelected.diskName;
 	var serverURL = 'http://www.tracks.cdpsfy.es/api/tracks/'+diskName;
+	var request = require('request');
 	request.post(serverURL, '');
 
-	// Buscamos en la BBDD con la ID para eliminarla.
+	// Borra la entrada del registro de datos
+	//delete track_model.tracks[trackId];
+
 	var query = Track.findOne({'diskName':diskName});
 
-	// Ejecutamos la peticion de buscar la cancion en la BBDD.
 	query.exec(function(err,track){
-
 		if (err){
-			console.log("ERROR: Fallo encontrando la cancion en la BBDD.");
+			console.log("FALLO ENCONTRANDO LA CANCION EN LA BBDD");
 		}else{
-			console.log("SUCCESS: Encontrada la cancion en la BBDD.")
-
-			// Si la imagen es la de por defecto no se borra.
+			//encontrada. Borramos.
+			//borramos la imagen
+			//si la imagen es la de por defecto, no la borro
 			if (track.image !== '/images/iconodisco.jpg'){
+				var fs = require('fs');
 				var filePath = './public'+track.image ; 
 				fs.unlinkSync(filePath);
 			}
 			
-			// Borrada la imagen, ahora borramos la cancion.
+
+
 			track.remove(function(err){
 				if (err){
-					console.log("ERROR: Se ha producido un error borrando la cancion.");
+					console.log("ERROR BORRANDO LA CANCION");
 				}else{
-					console.log("SUCCESS: Cancion borrada.");
+					console.log("CANCION BORRADA");
 				}
 				res.redirect('/tracks');
 			});
 		}
-	});
+	});	
+
+	
+
 };

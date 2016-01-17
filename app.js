@@ -12,7 +12,7 @@ var routes = require('./routes/index');
 
 var app = express();
 
-/************************************ BBDD ***************************************/
+/*BBDD*/
 mongoose.connect('mongodb://localhost/tracks', function(err, res) {
   if (err){
     console.log('ERROR: conectando a la DB. '+err);
@@ -38,16 +38,17 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 
-// Catch 404 and forward to error handler
+// catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-/******************************* Error handlers: *********************************/
+// error handlers
 
-// Development error handler will print stacktrace.
+// development error handler
+// will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
@@ -58,7 +59,9 @@ if (app.get('env') === 'development') {
   });
 }
 
-// Production error handler no stacktraces leaked to user
+
+// production error handler
+// no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
